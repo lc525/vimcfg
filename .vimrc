@@ -27,6 +27,7 @@ Plugin 'tpope/vim-speeddating'
 "Plugin 'fatih/vim-go'
 "Plugin 'scrooloose/nerdtree'
 Plugin 'jceb/vim-orgmode'
+Plugin 'mike-hearn/base16-vim-lightline'
 "Plugin 'Lokaltog/powerline'
 "Plugin 'benmills/vimux'
 "Plugin 'altercation/vim-colors-solarized'
@@ -36,6 +37,12 @@ Plugin 'jceb/vim-orgmode'
 "Plugin 'jalcine/cmake.vim'
 
 call vundle#end()
+
+" Colorscheme base16
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background
+endif
 
 " Tab bg color
 hi TabLineFill term=bold cterm=bold ctermbg=0
@@ -217,8 +224,8 @@ if has("gui_running")
     set guioptions-=L
     set guioptions+=a
     set guioptions-=m
-    let base16colorspace=256
-    colorschem base16-phd
+    "let base16colorspace=256
+    "colorschem base16-phd
     "colorscheme solarized
     set listchars=tab:▸\ 
     set guiheadroom=0
@@ -230,8 +237,8 @@ else
     "set t_Co=16
     "set background=dark
     "colorschem solarized
-    let base16colorspace=256
-    colorschem base16-phd
+    "let base16colorspace=256
+    "colorschem base16-phd
     highlight LineNr ctermfg=grey
 endif
 
@@ -365,7 +372,7 @@ map <Leader>; <Plug>(easymotion-bd-jk)
 " Lightline
 set noshowmode
 let g:lightline = {
-      \ 'colorscheme': 'wombat',
+      \ 'colorscheme': substitute(g:colors_name, "-", "_", "g"),
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
       \             [ 'fugitive', 'readonly', 'filename', 'modified' ] ],
@@ -374,7 +381,7 @@ let g:lightline = {
       \              [ 'fileformat', 'fileencoding' ] ]
       \ },
       \ 'component': {
-      \   'lineinfo': '⭡ %3l:%-2v'
+      \   'lineinfo': ' %3l:%-2v'
       \ },
       \ 'component_function': {
       \   'fugitive': 'LightLineFugitive',
@@ -382,8 +389,8 @@ let g:lightline = {
       \   'modified': 'LightLineModified',
       \   'filename': 'LightLineFilename'
       \ },
-      \ 'separator': { 'left': '⮀', 'right': '⮂' },
-      \ 'subseparator': { 'left': '⮁', 'right': '⮃' }
+      \ 'separator': { 'left': '', 'right': '' },
+      \ 'subseparator': { 'left': '', 'right': '' }
       \ }
 
 function! LightLineModified()
@@ -403,7 +410,7 @@ function! LightLineReadonly()
   if &filetype == "help"
     return ""
   elseif &readonly
-    return "⭤"
+    return ""
   else
     return ""
   endif
@@ -412,7 +419,7 @@ endfunction
 function! LightLineFugitive()
   if exists("*fugitive#head")
     let branch = fugitive#head()
-    return branch !=# '' ? '⭠ '.branch : ''
+    return branch !=# '' ? ' '.branch : ''
   endif
   return ''
 endfunction
