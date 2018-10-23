@@ -1,29 +1,37 @@
 set nocompatible
 filetype off
 
-set rtp+=~/.vim/bundle/vundle
-set rtp+=~/.vim/bundle/powerline/powerline/bindings/vim
+set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 " Let Vundle manage itself
-Plugin 'gmarik/vundle'
+Plugin 'VundleVim/Vundle.vim'
 
 " Plugins
 Plugin 'Valloric/YouCompleteMe'
+Plugin 'Valloric/MatchTagAlways'
 Plugin 'Syntastic'
-Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'majutsushi/tagbar'
-Plugin 'kien/ctrlp.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'fholgado/minibufexpl.vim'
-Plugin 'Lokaltog/powerline'
+Plugin 'itchyny/lightline.vim'
 Plugin 'Lokaltog/vim-easymotion'
 Plugin 'nacitar/terminalkeys.vim'
-Plugin 'benmills/vimux'
+Plugin 'dkprice/vim-easygrep'
 Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-dispatch'
-Plugin 'sjl/gundo.vim'
-"Plugin 'Townk/vim-autoclose'
+Plugin 'terryma/vim-multiple-cursors'
+Plugin 'Yggdroot/indentLine'
+Plugin 'skywind3000/asyncrun.vim'
+Plugin 'tpope/vim-speeddating'
+"Plugin 'fatih/vim-go'
+"Plugin 'scrooloose/nerdtree'
+Plugin 'jceb/vim-orgmode'
+"Plugin 'Lokaltog/powerline'
+"Plugin 'benmills/vimux'
+"Plugin 'altercation/vim-colors-solarized'
+"Plugin 'tpope/vim-dispatch'
+"Plugin 'sjl/gundo.vim'
 "Plugin 'vhdirk/vim-cmake'
 "Plugin 'jalcine/cmake.vim'
 
@@ -42,6 +50,9 @@ autocmd InsertLeave * match ExtraWhitespace /\s\+$/
 autocmd BufWinLeave * call clearmatches()
 " autocmd VimEnter * MiniBufExplorer
 
+" git commit
+autocmd Filetype gitcommit setlocal spell textwidth=72
+
 filetype plugin indent on
 
 " Tab Settings
@@ -53,16 +64,19 @@ set expandtab
 set encoding=utf-8
 set scrolloff=3
 set autoindent
+set shiftround
+set smarttab
 set showmode
 set showcmd
 set hidden
 set wildmenu
+"set termguicolors
 set wildmode=list:longest
-syntax on
+syntax enable
 
 " folding settings
 set foldmethod=marker
-set foldmarker={,}
+"set foldmarker={,}
 set foldnestmax=5
 set nofoldenable
 
@@ -72,16 +86,42 @@ set ruler
 set backspace=indent,eol,start
 set laststatus=2
 
-" set relativenumber
+set relativenumber
 set number
-set norelativenumber
+"set norelativenumber
 
 "Changing Leader Key
 let mapleader = ","
 
 " Enable Mouse
-" set mouse=a
-set clipboard=unnamedplus
+set mouse=a
+set clipboard^=unnamedplus
+
+" Reload .vimrc
+augroup myvimrc
+  au!
+  au BufWritePost .vimrc,.gvimrc nested so $MYVIMRC | if has('gui_running') | so $MYGVIMRC | endif
+augroup END
+
+" Sessions
+set sessionoptions=buffers,curdir,options,resize,winsize
+" Automatically save the current session whenever vim is closed
+autocmd VimLeave * mksession! ~/.vim/shutdown_session.vim
+
+" <F7> restores that 'shutdown session'
+noremap <F7> :source ~/.vim/shutdown_session.vim<CR>
+
+" If you really want to, this next line should restore the shutdown session 
+" automatically, whenever you start vim.  (Commented out for now, in case 
+" somebody just copy/pastes this whole block)
+" 
+" autocmd VimEnter source ~/.vim/shutdown_session.vim<CR>
+
+" manually save a session with <F5>
+noremap <F5> :mksession! ~/.vim/manual_session.vim<cr>
+
+" recall the manually saved session with <F6>
+noremap <F6> :source ~/.vim/manual_session.vim<cr>
 
 " Settings for Searching and Moving
 nnoremap / /\v
@@ -95,6 +135,9 @@ set hlsearch
 nnoremap <leader><space> :noh<cr>
 "nnoremap <tab> %
 "vnoremap <tab> %
+noremap ; :
+nnoremap j gj
+nnoremap k gk
 
 " Moving lines
 nnoremap <C-j> :m .+1<CR>==
@@ -104,6 +147,32 @@ inoremap <C-k> <Esc>:m .-2<CR>==gi
 vnoremap <C-j> :m '>+1<CR>gv=gv
 vnoremap <C-k> :m '<-2<CR>gv=gv
 
+" Tab navigation like Firefox.
+nnoremap <C-t>     :tabnew<CR>
+inoremap <C-t>     <Esc>:tabnew<CR>
+
+" Tmux
+let s:hidden_tmux = 0
+function! ToggleHideTmux()
+  if s:hidden_tmux == 0
+    let s:hidden_tmux = 1
+    execute "silent !tmux set status"
+  else
+    let s:hidden_tmux = 0
+    execute "silent !tmux set status"
+  endif
+endfunction
+
+function! ShowTmux()
+  if s:hidden_tmux == 1
+    let s:hidden_tmux = 0
+    execute "silent !tmux set status"
+  endif
+endfunction
+
+nnoremap <C-M-t> :call ToggleHideTmux()<CR>
+autocmd VimLeave * :call ShowTmux()
+
 " Make Vim to handle long lines nicely.
 set wrap
 set textwidth=80
@@ -112,13 +181,13 @@ set colorcolumn=80
 
 " To  show special characters in Vim
 set list
-set listchars=tab:▸-
+set listchars=tab:▸-,trail:-,extends:>,precedes:<,nbsp:+
 
 nnoremap <leader>w <C-w>v<C-w>l
-nnoremap <A-Left> <C-w>h
-nnoremap <A-Down> <C-w>j
-nnoremap <A-Up> <C-w>k
-nnoremap <A-Right> <C-w>l
+nnoremap <M-Left> <C-w>h
+nnoremap <M-Down> <C-w>j
+nnoremap <M-Up> <C-w>k
+nnoremap <M-Right> <C-w>l
 
 " Save with CTRL+S
 inoremap <C-s> <C-o>:update<CR>
@@ -127,10 +196,13 @@ vnoremap <silent> <C-s> <C-C>:update<CR>
 inoremap '; <ESC>
 vnoremap '; <ESC>
 
-" Switch to alternate tab
-"map <C-t> :tab split<CR>
-"imap <S-Tab> <Esc>gt
-"map <S-Tab> gt
+" Redrawing
+set lazyredraw
+set ttyfast
+
+" swaps and backups
+set backupdir=~/.vim/.backup//
+set directory=~/.vim/.swap//
 
 " =========== END Basic Vim Settings ===========
 
@@ -145,7 +217,9 @@ if has("gui_running")
     set guioptions-=L
     set guioptions+=a
     set guioptions-=m
-    colo molokai
+    let base16colorspace=256
+    colorschem base16-phd
+    "colorscheme solarized
     set listchars=tab:▸\ 
     set guiheadroom=0
     set switchbuf=useopen
@@ -153,16 +227,31 @@ if has("gui_running")
     " Maximize gvim window.
     " set lines=999 columns=999
 else
-    set t_Co=256
-    colorschem molokai
+    "set t_Co=16
+    "set background=dark
+    "colorschem solarized
+    let base16colorspace=256
+    colorschem base16-phd
+    highlight LineNr ctermfg=grey
 endif
 
 " ========== Plugin Settings =========="
 
+" Netrw
+nnoremap <leader>f :Explore<cr>
+autocmd FileType netrw setl bufhidden=wipe
+autocmd Filetype netrw nnoremap <buffer> <leader>f :Rex<cr>
+let g:netrw_banner = 0
+
 " Mapping to NERDTree
-nnoremap <leader>f :NERDTreeToggle<cr>
-let NERDTreeChDirMode = 2
-let NERDTreeIgnore=['\.vim$', '\~$', '\.pyc$']
+"nnoremap <leader>f :NERDTreeToggle<cr>
+"let NERDTreeChDirMode = 2
+"let NERDTreeIgnore=['\.vim$', '\~$', '\.pyc$']
+
+" NerdCommenter
+let g:NERDDefaultAlign = 'left'
+let g:NERDCommentEmptyLines = 1
+let g:NERDCompactSexyComs = 1
 
 " Fugitive
 nnoremap <leader>ge :Gedit<cr>
@@ -180,41 +269,55 @@ let g:ctrlp_open_multiple_files = '1hr'
 let g:ctrlp_open_new_file = 'r'
 let g:ctrlp_clear_cache_on_exit = 0
 
-
-" Mini Buffer some settigns."
-"let g:miniBufExplMapWindowNavVim = 1
-"let g:miniBufExplMapWindowNavArrows = 1
-let g:miniBufExplMapCTabSwitchBufs = 1
-let g:miniBufExplModSelTarget = 1
-
 " Tagbar key bindings."
 nmap <leader>o <ESC>:TagbarToggle<cr>
 imap <leader>o <ESC>:TagbarToggle<cr>
+nmap <leader>i <ESC>:TagbarOpen j<cr>
+imap <leader>i <ESC>:TagbarOpen j<cr>
+
 
 
 "YCM
-nnoremap <leader>jd :YcmCompleter GoToDefinitionElseDeclaration<CR>
+nnoremap <leader>j :YcmCompleter GoTo<CR>
+nnoremap <leader>jd :YcmCompleter GoToImprecise<CR>
+nnoremap <leader>y :YcmCompleter GetTypeImprecise<CR>
+nnoremap <leader>h :YcmCompleter GetDocImprecise<CR>
 let g:ycm_confirm_extra_conf = 0 "do not ask about .ycm_extra_conf
 let g:ycm_add_preview_to_completeopt = 1
 let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_collect_identifiers_from_tags_files = 1
-let g:ycm_show_diagnostics_ui = 0
+let g:ycm_global_ycm_extra_conf= ''
+let g:ycm_rust_src_path = '/usr/local/share/code/rustc-1.18.0-src/src'
+
+"Highlight/show errors and their location using the clang completer
+let g:ycm_warning_symbol = 'w>'
+
+"Ycm Experimental
+let g:ycm_show_diagnostics_ui = 1
+let g:ycm_always_populate_location_list = 1
+let g:ycm_complete_in_comments = 1
 
 "CMake options
 "let g:cmake_c_compiler = 'gcc'
 "let g:cmake_inject_flags.ycm = 0
 
 " Syntastic options
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_cpp_compiler_options = ' -std=c++11 -stdlib=libc++'
+" let g:syntastic_always_populate_loc_list = 1
+" let g:syntastic_auto_loc_list = 1
+" let g:syntastic_cpp_compiler_options = ' -std=c++11 -stdlib=libc++'
 
 " Gundo options
-nnoremap <F5> :GundoToggle<CR>
+"nnoremap <F5> :GundoToggle<CR>
 
 " Switch to alternate buffer
 nnoremap <C-Right> :MBEbn<cr>
 nnoremap <C-Left> :MBEbp<cr>
+
+"Minibufexpl
+"let g:miniBufExplVSplit = 30
+let g:miniBufExplorerAutoStart = 0
+let g:miniBufExplBuffersNeeded = 0
+nmap <leader>m :MBEToggle<cr>
 
 
 " Window resize
@@ -227,10 +330,103 @@ endif
 
 " Printing
 command! -nargs=* Hardcopy call DoMyPrint('<args>')
-function DoMyPrint(args)
+function! DoMyPrint(args)
     let colorsave=g:colors_name
     color github
     exec 'hardcopy '.a:args
     exec 'color '.colorsave
 endfunction
+
+" Searching
+" map <F4> :execute "vimgrep /<c-r><c-w>/j **/*.".expand("%:e") <Bar> cw<CR>
+
+
+" fit quickfix window
+au FileType qf call AdjustWindowHeight(7, 10)
+function! AdjustWindowHeight(minheight, maxheight)
+  exe max([min([line("$"), a:maxheight]), a:minheight]) . "wincmd _"
+endfunction
+
+" The Silver Searcher
+if executable('ag')
+  set grepprg=ag\ --vimgrep
+  "set grepprg=ack\ -H\ --nocolor\ --nogroup
+  set grepformat=%f:%l:%c:%m
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+  let g:EasyGrepCommand=1
+  let g:EasyGrepAllOptionsInExplorer=1
+  let g:EasyGrepMode=0
+  let g:EasyGrepFilesToExclude=""
+endif
+
+" EasyMotion
+map <Leader>; <Plug>(easymotion-bd-jk)
+
+" Lightline
+set noshowmode
+let g:lightline = {
+      \ 'colorscheme': 'wombat',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'fugitive', 'readonly', 'filename', 'modified' ] ],
+      \   'right': [ [ 'lineinfo' ],
+      \              [ 'percent' ],
+      \              [ 'fileformat', 'fileencoding' ] ]
+      \ },
+      \ 'component': {
+      \   'lineinfo': '⭡ %3l:%-2v'
+      \ },
+      \ 'component_function': {
+      \   'fugitive': 'LightLineFugitive',
+      \   'readonly': 'LightLineReadonly',
+      \   'modified': 'LightLineModified',
+      \   'filename': 'LightLineFilename'
+      \ },
+      \ 'separator': { 'left': '⮀', 'right': '⮂' },
+      \ 'subseparator': { 'left': '⮁', 'right': '⮃' }
+      \ }
+
+function! LightLineModified()
+  if &filetype == "help"
+    return ""
+  elseif &modified
+    return "+"
+  elseif &modifiable
+    return ""
+  else
+    return ""
+  endif
+endfunction
+
+
+function! LightLineReadonly()
+  if &filetype == "help"
+    return ""
+  elseif &readonly
+    return "⭤"
+  else
+    return ""
+  endif
+endfunction
+
+function! LightLineFugitive()
+  if exists("*fugitive#head")
+    let branch = fugitive#head()
+    return branch !=# '' ? '⭠ '.branch : ''
+  endif
+  return ''
+endfunction
+
+function! LightLineFilename()
+  return ('' != LightLineReadonly() ? LightLineReadonly() . ' ' : '') .
+       \ ('' != expand('%:t') ? expand('%:t') : '[No Name]') .
+       \ ('' != LightLineModified() ? ' ' . LightLineModified() : '')
+endfunction
+
+" indentLine
+"let g:indentLine_char = '⦙'
+"let g:indentLine_char = '│'
+let g:indentLine_concealcursor ='nc'
+let g:indentLine_char = '┊'
+:set fillchars+=vert:\ 
 
